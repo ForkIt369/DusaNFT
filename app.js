@@ -49,31 +49,14 @@ let web3;
 let contract;
 let currentAccount;
 
-// Wait for MetaMask to be injected
-async function waitForMetaMask() {
-    // If already available, return immediately
-    if (typeof window.ethereum !== 'undefined') {
-        return true;
-    }
-    
-    // Wait up to 3 seconds for MetaMask to inject
-    let attempts = 0;
-    while (attempts < 30) {
-        if (typeof window.ethereum !== 'undefined') {
-            return true;
-        }
-        await new Promise(resolve => setTimeout(resolve, 100));
-        attempts++;
-    }
-    
-    return false;
+// Check for MetaMask specifically
+function hasMetaMask() {
+    return typeof window.ethereum !== 'undefined' && window.ethereum.isMetaMask;
 }
 
 // Initialize Web3
 async function initWeb3() {
-    const hasMetaMask = await waitForMetaMask();
-    
-    if (!hasMetaMask) {
+    if (!hasMetaMask()) {
         showStatus('MetaMask not detected. Please install MetaMask extension.', 'error');
         return false;
     }
@@ -286,9 +269,9 @@ function showStatus(message, type) {
     }
 }
 
-// Event listeners
-document.getElementById('connectWallet').addEventListener('click', connectWallet);
-document.getElementById('mintButton').addEventListener('click', mintNFT);
+// Event listeners - moved inside load event
+// document.getElementById('connectWallet').addEventListener('click', connectWallet);
+// document.getElementById('mintButton').addEventListener('click', mintNFT);
 
 // Check for account changes
 if (window.ethereum) {
@@ -317,20 +300,37 @@ if (window.ethereum) {
 }
 
 // Initialize on load
-window.addEventListener('load', async () => {
-    // Don't auto-initialize, wait for user to click connect
+window.addEventListener('DOMContentLoaded', async () => {
     console.log('Dusa NFT Minting App loaded');
     console.log('Contract:', CONTRACT_ADDRESS);
     console.log('MetaMask detected:', typeof window.ethereum !== 'undefined');
     
-    // Add error handling for button
+    // Get buttons
     const connectBtn = document.getElementById('connectWallet');
     const mintBtn = document.getElementById('mintButton');
     
-    if (!connectBtn) {
+    if (connectBtn) {
+        connectBtn.addEventListener('click', async (e) => {
+            e.preventDefault();
+            console.log('Connect button clicked');
+            await connectWallet();
+        });
+    } else {
         console.error('Connect button not found!');
     }
-    if (!mintBtn) {
+    
+    if (mintBtn) {
+        mintBtn.addEventListener('click', async (e) => {
+            e.preventDefault();
+            console.log('Mint button clicked');
+            await mintNFT();
+        });
+    } else {
         console.error('Mint button not found!');
+    }
+    
+    // Check for MetaMask
+    if (typeof window.ethereum === 'undefined') {
+        showStatus('Please install MetaMask to use this dApp', 'error');
     }
 });
