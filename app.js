@@ -2,7 +2,7 @@
 const METIS_CHAINID = '0x440'; // 1088 in hex
 const METIS_RPC = 'https://andromeda.metis.io/?owner=1088';
 const CONTRACT_ADDRESS = '0x5C30e1552d37d3e119dAC4Fc4e364258f8809Bd8'; // Your deployed contract!
-const METADATA_URI = 'ipfs://QmYourMetadataCID'; // Upload metadata/dusa-nft-metadata.json to Pinata and update this
+const METADATA_URI = 'ipfs://bafkreiazyhrirhlyeyxkvw7kukkcts2glji5vryobbqdcnnmz2otkvyjk4'; // Metadata uploaded!
 
 // Whitelist addresses (add addresses that can mint)
 const WHITELIST = [
