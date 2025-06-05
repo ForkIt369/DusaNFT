@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dusa NFT - Reputation Preview</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #0D1117;
+            color: #E6EDF3;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(ellipse at center, #161B22 0%, #0D1117 100%);
+            z-index: -1;
+        }
+
+        .preview-container {
+            display: flex;
+            gap: 60px;
+            max-width: 1000px;
+            width: 100%;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .nft-card {
+            background: rgba(22, 27, 34, 0.8);
+            backdrop-filter: blur(10px);
+            border-radius: 24px;
+            padding: 40px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            width: 420px;
+            position: relative;
+            border: 1px solid rgba(48, 54, 61, 0.5);
+        }
+
+        .nft-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .nft-info {
+            text-align: left;
+        }
+
+        .nft-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #E6EDF3;
+            margin-bottom: 4px;
+        }
+
+        .owner-info {
+            font-size: 0.85rem;
+            color: #7D8590;
+        }
+
+        .nft-level {
+            background: linear-gradient(135deg, #512FC9, #6644DD);
+            color: white;
+            padding: 8px 20px;
+            border-radius: 30px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            box-shadow: 0 4px 12px rgba(81, 47, 201, 0.3);
+        }
+
+        .nft-image {
+            width: 100%;
+            height: 220px;
+            background: #0D1117;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 40px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .nft-image video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 16px;
+        }
+
+        .rings-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin: 40px 0;
+        }
+
+        .ring-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .ring-container {
+            position: relative;
+            width: 100px;
+            height: 100px;
+        }
+
+        .ring {
+            width: 100%;
+            height: 100%;
+            position: relative;
+        }
+
+        .ring svg {
+            transform: rotate(-90deg);
+            width: 100%;
+            height: 100%;
+            filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.3));
+        }
+
+        .ring-background {
+            fill: none;
+            stroke: rgba(48, 54, 61, 0.5);
+            stroke-width: 6;
+        }
+
+        .ring-progress {
+            fill: none;
+            stroke-width: 6;
+            stroke-linecap: round;
+            transition: stroke-dasharray 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .align-ring { stroke: #FFFFFF; filter: drop-shadow(0 0 6px rgba(255, 255, 255, 0.5)); }
+        .action-ring { stroke: #FFA500; filter: drop-shadow(0 0 6px rgba(255, 165, 0, 0.5)); }
+        .karma-ring { stroke: #8B5CF6; filter: drop-shadow(0 0 6px rgba(139, 92, 246, 0.5)); }
+        .synergy-ring { stroke: #10B981; filter: drop-shadow(0 0 6px rgba(16, 185, 129, 0.5)); }
+
+        .ring-center {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 1.5rem;
+        }
+
+        .ring-info {
+            text-align: center;
+        }
+
+        .ring-label {
+            font-size: 0.85rem;
+            color: #7D8590;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        .ring-value {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #E6EDF3;
+        }
+
+        .tier-badge {
+            display: inline-block;
+            background: rgba(48, 54, 61, 0.5);
+            padding: 2px 10px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            color: #7D8590;
+            margin-top: 4px;
+        }
+
+        .total-section {
+            text-align: center;
+            padding: 30px 0 0;
+            border-top: 1px solid rgba(48, 54, 61, 0.3);
+        }
+
+        .total-label {
+            color: #7D8590;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+        }
+
+        .total-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #00E0FF, #512FC9);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .demo-controls {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(22, 27, 34, 0.9);
+            backdrop-filter: blur(10px);
+            padding: 16px;
+            border-radius: 60px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            display: flex;
+            gap: 8px;
+            border: 1px solid rgba(48, 54, 61, 0.5);
+        }
+
+        .demo-btn {
+            padding: 12px 24px;
+            background: transparent;
+            color: #7D8590;
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            font-size: 0.9rem;
+        }
+
+        .demo-btn:hover {
+            background: rgba(81, 47, 201, 0.1);
+            color: #00E0FF;
+        }
+
+        .demo-btn:active {
+            transform: scale(0.95);
+        }
+
+        h1 {
+            position: absolute;
+            top: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 1.2rem;
+            font-weight: 500;
+            color: #7D8590;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.02); box-shadow: 0 12px 40px rgba(0, 224, 255, 0.3); }
+            100% { transform: scale(1); }
+        }
+
+        @media (max-width: 900px) {
+            .preview-container {
+                flex-direction: column;
+                gap: 40px;
+            }
+            
+            .nft-card {
+                width: 100%;
+                max-width: 420px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>Reputation System</h1>
+
+    <div class="preview-container">
+        <!-- NFT Card 1 - Beginner -->
+        <div class="nft-card">
+            <div class="nft-header">
+                <div class="nft-info">
+                    <h2 class="nft-title">Dusa NFT #0</h2>
+                    <div class="owner-info">0x6Cb5...9Bd8</div>
+                </div>
+                <div class="nft-level">Level 3</div>
+            </div>
+
+            <div class="nft-image">
+                <video autoplay loop muted>
+                    <source src="https://ipfs.io/ipfs/bafybeigipzvliwhovucye4nv2ivk4qxr5r2bgs3kejaf3xz4i6yhnn3a5m" type="video/mp4">
+                </video>
+            </div>
+
+            <div class="rings-grid">
+                <div class="ring-wrapper">
+                    <div class="ring-container">
+                        <div class="ring">
+                            <svg viewBox="0 0 100 100">
+                                <circle class="ring-background" cx="50" cy="50" r="40"></circle>
+                                <circle class="ring-progress align-ring" cx="50" cy="50" r="40" 
+                                        stroke-dasharray="62.83185307179586, 188.49555921538763" 
+                                        data-tier="1"></circle>
+                            </svg>
+                            <div class="ring-center">🎯</div>
+                        </div>
+                    </div>
+                    <div class="ring-info">
+                        <div class="ring-label">Align</div>
+                        <div class="ring-value">750 BITS</div>
+                        <div class="tier-badge">Tier 1</div>
+                    </div>
+                </div>
+
+                <div class="ring-wrapper">
+                    <div class="ring-container">
+                        <div class="ring">
+                            <svg viewBox="0 0 100 100">
+                                <circle class="ring-background" cx="50" cy="50" r="40"></circle>
+                                <circle class="ring-progress action-ring" cx="50" cy="50" r="40" 
+                                        stroke-dasharray="41.88790204786391, 209.43951023931957" 
+                                        data-tier="1"></circle>
+                            </svg>
+                            <div class="ring-center">⚡</div>
+                        </div>
+                    </div>
+                    <div class="ring-info">
+                        <div class="ring-label">Action</div>
+                        <div class="ring-value">500 BITS</div>
+                        <div class="tier-badge">Tier 1</div>
+                    </div>
+                </div>
+
+                <div class="ring-wrapper">
+                    <div class="ring-container">
+                        <div class="ring">
+                            <svg viewBox="0 0 100 100">
+                                <circle class="ring-background" cx="50" cy="50" r="40"></circle>
+                                <circle class="ring-progress karma-ring" cx="50" cy="50" r="40" 
+                                        stroke-dasharray="100.53096491487338, 150.79644737231007" 
+                                        data-tier="2"></circle>
+                            </svg>
+                            <div class="ring-center">✨</div>
+                        </div>
+                    </div>
+                    <div class="ring-info">
+                        <div class="ring-label">Karma</div>
+                        <div class="ring-value">1,200 BITS</div>
+                        <div class="tier-badge">Tier 2</div>
+                    </div>
+                </div>
+
+                <div class="ring-wrapper">
+                    <div class="ring-container">
+                        <div class="ring">
+                            <svg viewBox="0 0 100 100">
+                                <circle class="ring-background" cx="50" cy="50" r="40"></circle>
+                                <circle class="ring-progress synergy-ring" cx="50" cy="50" r="40" 
+                                        stroke-dasharray="25.132741228718345, 226.1946710584651" 
+                                        data-tier="1"></circle>
+                            </svg>
+                            <div class="ring-center">🤝</div>
+                        </div>
+                    </div>
+                    <div class="ring-info">
+                        <div class="ring-label">Synergy</div>
+                        <div class="ring-value">300 BITS</div>
+                        <div class="tier-badge">Tier 1</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="total-section">
+                <div class="total-label">Total BITS</div>
+                <div class="total-value">2,750</div>
+            </div>
+        </div>
+
+        <!-- NFT Card 2 - Advanced -->
+        <div class="nft-card">
+            <div class="nft-header">
+                <div class="nft-info">
+                    <h2 class="nft-title">Dusa NFT #42</h2>
+                    <div class="owner-info">0xAB12...34CD</div>
+                </div>
+                <div class="nft-level">Level 15</div>
+            </div>
+
+            <div class="nft-image">
+                <video autoplay loop muted>
+                    <source src="https://ipfs.io/ipfs/bafybeigipzvliwhovucye4nv2ivk4qxr5r2bgs3kejaf3xz4i6yhnn3a5m" type="video/mp4">
+                </video>
+            </div>
+
+            <div class="rings-grid">
+                <div class="ring-wrapper">
+                    <div class="ring-container">
+                        <div class="ring">
+                            <svg viewBox="0 0 100 100">
+                                <circle class="ring-background" cx="50" cy="50" r="40"></circle>
+                                <circle class="ring-progress align-ring" cx="50" cy="50" r="40" 
+                                        stroke-dasharray="188.49555921538763, 62.83185307179586" 
+                                        data-tier="4"></circle>
+                            </svg>
+                            <div class="ring-center">🎯</div>
+                        </div>
+                    </div>
+                    <div class="ring-info">
+                        <div class="ring-label">Align</div>
+                        <div class="ring-value">4,500 BITS</div>
+                        <div class="tier-badge">Tier 4</div>
+                    </div>
+                </div>
+
+                <div class="ring-wrapper">
+                    <div class="ring-container">
+                        <div class="ring">
+                            <svg viewBox="0 0 100 100">
+                                <circle class="ring-background" cx="50" cy="50" r="40"></circle>
+                                <circle class="ring-progress action-ring" cx="50" cy="50" r="40" 
+                                        stroke-dasharray="67.02064428063374, 184.30676902061122" 
+                                        data-tier="3"></circle>
+                            </svg>
+                            <div class="ring-center">⚡</div>
+                        </div>
+                    </div>
+                    <div class="ring-info">
+                        <div class="ring-label">Action</div>
+                        <div class="ring-value">3,200 BITS</div>
+                        <div class="tier-badge">Tier 3</div>
+                    </div>
+                </div>
+
+                <div class="ring-wrapper">
+                    <div class="ring-container">
+                        <div class="ring">
+                            <svg viewBox="0 0 100 100">
+                                <circle class="ring-background" cx="50" cy="50" r="40"></circle>
+                                <circle class="ring-progress karma-ring" cx="50" cy="50" r="40" 
+                                        stroke-dasharray="158.65597524510112, 92.67143704208236" 
+                                        data-tier="3"></circle>
+                            </svg>
+                            <div class="ring-center">✨</div>
+                        </div>
+                    </div>
+                    <div class="ring-info">
+                        <div class="ring-label">Karma</div>
+                        <div class="ring-value">3,800 BITS</div>
+                        <div class="tier-badge">Tier 3</div>
+                    </div>
+                </div>
+
+                <div class="ring-wrapper">
+                    <div class="ring-container">
+                        <div class="ring">
+                            <svg viewBox="0 0 100 100">
+                                <circle class="ring-background" cx="50" cy="50" r="40"></circle>
+                                <circle class="ring-progress synergy-ring" cx="50" cy="50" r="40" 
+                                        stroke-dasharray="167.5516107015788, 83.77580535078717" 
+                                        data-tier="4"></circle>
+                            </svg>
+                            <div class="ring-center">🤝</div>
+                        </div>
+                    </div>
+                    <div class="ring-info">
+                        <div class="ring-label">Synergy</div>
+                        <div class="ring-value">4,000 BITS</div>
+                        <div class="tier-badge">Tier 4</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="total-section">
+                <div class="total-label">Total BITS</div>
+                <div class="total-value">15,500</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="demo-controls">
+        <button class="demo-btn" onclick="addRandomBits()">Add BITS</button>
+        <button class="demo-btn" onclick="levelUp()">Level Up</button>
+        <button class="demo-btn" onclick="resetDemo()">Reset</button>
+    </div>
+
+    <script>
+        let bitsValues = {
+            card1: { align: 750, action: 500, karma: 1200, synergy: 300 },
+            card2: { align: 4500, action: 3200, karma: 3800, synergy: 4000 }
+        };
+
+        // Define tier thresholds
+        const TIER_THRESHOLDS = {
+            1: 1000,
+            2: 2500,
+            3: 5000,
+            4: 10000
+        };
+
+        function getTier(bits) {
+            if (bits < TIER_THRESHOLDS[1]) return 1;
+            if (bits < TIER_THRESHOLDS[2]) return 2;
+            if (bits < TIER_THRESHOLDS[3]) return 3;
+            return 4;
+        }
+
+        function getTierProgress(bits) {
+            const tier = getTier(bits);
+            let tierMin = tier === 1 ? 0 : TIER_THRESHOLDS[tier - 1];
+            let tierMax = tier === 4 ? TIER_THRESHOLDS[4] || 10000 : TIER_THRESHOLDS[tier];
+            let tierRange = tierMax - tierMin;
+            let bitsInTier = bits - tierMin;
+            return Math.min(100, (bitsInTier / tierRange) * 100);
+        }
+
+        function updateRings() {
+            const cards = document.querySelectorAll('.nft-card');
+            cards.forEach((card, index) => {
+                const values = index === 0 ? bitsValues.card1 : bitsValues.card2;
+                const total = values.align + values.action + values.karma + values.synergy;
+                const level = Math.floor(total / 1000);
+                
+                card.querySelector('.nft-level').textContent = `Level ${level}`;
+                card.querySelector('.total-value').textContent = total.toLocaleString();
+                
+                // Update rings
+                const categories = ['align', 'action', 'karma', 'synergy'];
+                const rings = card.querySelectorAll('.ring-wrapper');
+                
+                rings.forEach((ring, i) => {
+                    const category = categories[i];
+                    const bits = values[category];
+                    const tier = getTier(bits);
+                    const progress = getTierProgress(bits);
+                    
+                    // Update ring progress (radius is now 40)
+                    const circumference = 2 * Math.PI * 40;
+                    const dashArray = (progress / 100) * circumference;
+                    const dashGap = circumference - dashArray;
+                    
+                    const progressRing = ring.querySelector('.ring-progress');
+                    progressRing.style.strokeDasharray = `${dashArray}, ${dashGap}`;
+                    progressRing.setAttribute('data-tier', tier);
+                    
+                    // Update values
+                    ring.querySelector('.ring-value').textContent = `${bits.toLocaleString()} BITS`;
+                    ring.querySelector('.tier-badge').textContent = `Tier ${tier}`;
+                });
+            });
+        }
+
+        function addRandomBits() {
+            // Add random BITS to both cards
+            bitsValues.card1.align += Math.floor(Math.random() * 300);
+            bitsValues.card1.action += Math.floor(Math.random() * 300);
+            bitsValues.card1.karma += Math.floor(Math.random() * 300);
+            bitsValues.card1.synergy += Math.floor(Math.random() * 300);
+            
+            bitsValues.card2.align += Math.floor(Math.random() * 600);
+            bitsValues.card2.action += Math.floor(Math.random() * 600);
+            bitsValues.card2.karma += Math.floor(Math.random() * 600);
+            bitsValues.card2.synergy += Math.floor(Math.random() * 600);
+            
+            updateRings();
+
+            // Visual feedback
+            const cards = document.querySelectorAll('.nft-card');
+            cards.forEach(card => {
+                const rings = card.querySelectorAll('.ring-progress');
+                rings.forEach(ring => {
+                    ring.style.animation = 'none';
+                    setTimeout(() => {
+                        ring.style.animation = '';
+                    }, 10);
+                });
+            });
+        }
+
+        function levelUp() {
+            const cards = document.querySelectorAll('.nft-card');
+            cards.forEach(card => {
+                card.style.animation = 'pulse 0.5s ease';
+                setTimeout(() => {
+                    card.style.animation = '';
+                }, 500);
+            });
+        }
+
+        function resetDemo() {
+            bitsValues = {
+                card1: { align: 750, action: 500, karma: 1200, synergy: 300 },
+                card2: { align: 4500, action: 3200, karma: 3800, synergy: 4000 }
+            };
+            updateRings();
+        }
+
+        // Initialize on load
+        updateRings();
+    </script>
+</body>
+</html>
