@@ -49,48 +49,22 @@ let web3;
 let contract;
 let currentAccount;
 
-// Wait for MetaMask to be injected
-async function waitForMetaMask() {
-    // If already available, return immediately
-    if (typeof window.ethereum !== 'undefined') {
-        return true;
-    }
-    
-    // Wait up to 3 seconds for MetaMask to inject
-    let attempts = 0;
-    while (attempts < 30) {
-        if (typeof window.ethereum !== 'undefined') {
-            return true;
-        }
-        await new Promise(resolve => setTimeout(resolve, 100));
-        attempts++;
-    }
-    
-    return false;
-}
-
 // Initialize Web3
 async function initWeb3() {
-    const hasMetaMask = await waitForMetaMask();
-    
-    if (!hasMetaMask) {
-        showStatus('MetaMask not detected. Please install MetaMask extension.', 'error');
-        return false;
-    }
-    
-    try {
-        web3 = new Web3(window.ethereum);
-        
-        // Initialize contract
-        if (CONTRACT_ADDRESS) {
-            contract = new web3.eth.Contract(CONTRACT_ABI, CONTRACT_ADDRESS);
+    if (typeof window.ethereum !== 'undefined') {
+        try {
+            web3 = new Web3(window.ethereum);
+            
+            // Initialize contract
+            if (CONTRACT_ADDRESS) {
+                contract = new web3.eth.Contract(CONTRACT_ABI, CONTRACT_ADDRESS);
+            }
+        } catch (error) {
+            console.error('Web3 init error:', error);
+            showStatus('Failed to initialize Web3', 'error');
         }
-        
-        return true;
-    } catch (error) {
-        console.error('Web3 initialization error:', error);
-        showStatus('Failed to initialize Web3', 'error');
-        return false;
+    } else {
+        showStatus('Please install MetaMask to mint NFTs', 'error');
     }
 }
 
@@ -101,7 +75,6 @@ async function switchToMetis() {
             method: 'wallet_switchEthereumChain',
             params: [{ chainId: METIS_CHAINID }],
         });
-        return true;
     } catch (switchError) {
         // This error code indicates that the chain has not been added to MetaMask
         if (switchError.code === 4902) {
@@ -120,85 +93,50 @@ async function switchToMetis() {
                         blockExplorerUrls: ['https://andromeda-explorer.metis.io/']
                     }],
                 });
-                return true;
             } catch (addError) {
-                console.error('Failed to add Metis network:', addError);
                 showStatus('Failed to add Metis network', 'error');
-                return false;
             }
         }
-        console.error('Failed to switch network:', switchError);
-        return false;
     }
 }
 
 // Connect Wallet
 async function connectWallet() {
     try {
-        // First ensure Web3 is initialized
-        const web3Ready = await initWeb3();
-        if (!web3Ready) {
-            return;
-        }
+        // Request accounts
+        const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
         
-        // Check if MetaMask is locked
-        const accounts = await window.ethereum.request({ method: 'eth_accounts' });
-        let currentAccounts = accounts;
-        
-        // If no accounts, request access
         if (accounts.length === 0) {
-            currentAccounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+            throw new Error('No accounts found');
         }
         
-        if (currentAccounts.length === 0) {
-            throw new Error('No accounts found. Please unlock MetaMask.');
-        }
-        
-        currentAccount = currentAccounts[0];
+        currentAccount = accounts[0];
         
         // Check network and switch if needed
-        const chainId = await window.ethereum.request({ method: 'eth_chainId' });
-        const chainIdDecimal = parseInt(chainId, 16);
-        
-        if (chainIdDecimal !== 1088) {
-            showStatus('Switching to Metis network...', 'success');
-            const switched = await switchToMetis();
-            if (!switched) {
-                throw new Error('Failed to switch to Metis network');
-            }
+        const chainId = await web3.eth.getChainId();
+        if (chainId !== 1088) {
+            await switchToMetis();
         }
         
-        // Update UI
         document.getElementById('walletAddress').textContent = 
             currentAccount.slice(0, 6) + '...' + currentAccount.slice(-4);
         
         document.getElementById('connectWallet').style.display = 'none';
         document.getElementById('mintButton').disabled = false;
         
-        showStatus('Wallet connected successfully!', 'success');
-        
-        // Update supply if contract is available
-        if (contract) {
-            updateSupply();
+        // Initialize contract after connection
+        if (!contract && CONTRACT_ADDRESS) {
+            contract = new web3.eth.Contract(CONTRACT_ABI, CONTRACT_ADDRESS);
         }
         
+        updateSupply();
     } catch (error) {
         console.error('Connect error:', error);
-        let errorMessage = 'Failed to connect wallet';
-        
-        if (error.message) {
-            errorMessage = error.message;
-        } else if (error.code === -32002) {
-            errorMessage = 'Please unlock MetaMask';
-        } else if (error.code === 4001) {
-            errorMessage = 'Connection request rejected';
-        }
-        
-        showStatus(errorMessage, 'error');
+        showStatus('Failed to connect wallet: ' + error.message, 'error');
     }
 }
 
-// Update supply display  
+// Update supply display
 async function updateSupply() {
     if (contract) {
         try {
@@ -253,19 +191,7 @@ async function mintNFT() {
         
     } catch (error) {
         console.error('Minting error:', error);
-        let errorMessage = 'Failed to mint NFT';
-        
-        if (error.message) {
-            if (error.message.includes('insufficient funds')) {
-                errorMessage = 'Insufficient METIS balance';
-            } else if (error.message.includes('User denied')) {
-                errorMessage = 'Transaction rejected';
-            } else {
-                errorMessage = error.message;
-            }
-        }
-        
-        showStatus(errorMessage, 'error');
+        showStatus(error.message || 'Failed to mint NFT', 'error');
     } finally {
         mintButton.disabled = false;
         mintButton.textContent = 'Mint NFT';
@@ -279,11 +205,9 @@ function showStatus(message, type) {
     statusEl.className = `status-message ${type}`;
     statusEl.style.display = 'block';
     
-    if (type === 'success') {
-        setTimeout(() => {
-            statusEl.style.display = 'none';
-        }, 5000);
-    }
+    setTimeout(() => {
+        statusEl.style.display = 'none';
+    }, 5000);
 }
 
 // Event listeners
@@ -298,27 +222,13 @@ if (window.ethereum) {
             document.getElementById('walletAddress').textContent = '';
             document.getElementById('connectWallet').style.display = 'block';
             document.getElementById('mintButton').disabled = true;
-        } else if (accounts[0] !== currentAccount) {
+        } else {
             currentAccount = accounts[0];
             document.getElementById('walletAddress').textContent = 
                 currentAccount.slice(0, 6) + '...' + currentAccount.slice(-4);
-            
-            // Check if new account is whitelisted
-            if (!isWhitelisted(currentAccount)) {
-                showStatus('This address is not whitelisted', 'error');
-            }
         }
-    });
-    
-    window.ethereum.on('chainChanged', (chainId) => {
-        // Reload the page when chain changes
-        window.location.reload();
     });
 }
 
 // Initialize on load
-window.addEventListener('load', async () => {
-    // Don't auto-initialize, wait for user to click connect
-    console.log('Dusa NFT Minting App loaded');
-    console.log('Contract:', CONTRACT_ADDRESS);
-});
+window.addEventListener('load', initWeb3);

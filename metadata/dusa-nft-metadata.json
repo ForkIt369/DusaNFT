@@ -3,6 +3,7 @@
   "description": "A unique video NFT on the Metis Andromeda blockchain",
   "image": "ipfs://bafybeigipzvliwhovucye4nv2ivk4qxr5r2bgs3kejaf3xz4i6yhnn3a5m",
   "animation_url": "ipfs://bafybeigipzvliwhovucye4nv2ivk4qxr5r2bgs3kejaf3xz4i6yhnn3a5m",
+  "external_url": "https://github.com/ForkIt369/DusaNFT",
   "attributes": [
     {
       "trait_type": "Type",
