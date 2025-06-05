@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.19;
+pragma solidity ^0.8.20;
 
-import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/v4.9.3/contracts/token/ERC721/ERC721.sol";
-import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/v4.9.3/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
-import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/v4.9.3/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
+import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 
 contract DusaNFT is ERC721, ERC721URIStorage, Ownable {
-    uint256 private _tokenIdCounter;
+    uint256 private _nextTokenId;
     uint256 public mintPrice = 0.01 ether;
     uint256 public maxSupply = 10000;
     bool public mintingEnabled = true;
@@ -19,10 +19,10 @@ contract DusaNFT is ERC721, ERC721URIStorage, Ownable {
         require(mintingEnabled, "Minting is currently disabled");
         require(msg.value >= mintPrice, "Insufficient payment");
         
-        uint256 tokenId = _tokenIdCounter;
+        uint256 tokenId = _nextTokenId;
         require(tokenId < maxSupply, "Max supply reached");
         
-        _tokenIdCounter++;
+        _nextTokenId++;
         _safeMint(to, tokenId);
         _setTokenURI(tokenId, uri);
         
@@ -40,30 +40,14 @@ contract DusaNFT is ERC721, ERC721URIStorage, Ownable {
     function withdraw() public onlyOwner {
         uint256 balance = address(this).balance;
         require(balance > 0, "No funds to withdraw");
-        (bool success, ) = payable(owner()).call{value: balance}("");
-        require(success, "Transfer failed");
+        payable(owner()).transfer(balance);
     }
 
     function totalSupply() public view returns (uint256) {
-        return _tokenIdCounter;
+        return _nextTokenId;
     }
 
-    // Override functions with explicit parent contracts specified
-    function _update(address to, uint256 tokenId, address auth)
-        internal
-        override(ERC721)
-        returns (address)
-    {
-        return super._update(to, tokenId, auth);
-    }
-
-    function _increaseBalance(address account, uint128 value) 
-        internal 
-        override(ERC721) 
-    {
-        super._increaseBalance(account, value);
-    }
-
+    // The following functions are overrides required by Solidity
     function tokenURI(uint256 tokenId)
         public
         view
