@@ -321,4 +321,16 @@ window.addEventListener('load', async () => {
     // Don't auto-initialize, wait for user to click connect
     console.log('Dusa NFT Minting App loaded');
     console.log('Contract:', CONTRACT_ADDRESS);
+    console.log('MetaMask detected:', typeof window.ethereum !== 'undefined');
+    
+    // Add error handling for button
+    const connectBtn = document.getElementById('connectWallet');
+    const mintBtn = document.getElementById('mintButton');
+    
+    if (!connectBtn) {
+        console.error('Connect button not found!');
+    }
+    if (!mintBtn) {
+        console.error('Mint button not found!');
+    }
 });
