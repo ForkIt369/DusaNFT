@@ -4,11 +4,17 @@ const METIS_RPC = 'https://andromeda.metis.io/?owner=1088';
 const CONTRACT_ADDRESS = '0x5C30e1552d37d3e119dAC4Fc4e364258f8809Bd8'; // Your deployed contract!
 const METADATA_URI = 'ipfs://bafkreiazyhrirhlyeyxkvw7kukkcts2glji5vryobbqdcnnmz2otkvyjk4'; // Metadata uploaded!
 
-// Whitelist addresses (add addresses that can mint)
-const WHITELIST = [
-    '0x6Cb5365ADfC0fdFc2aD7C02151A04e9f0F9eBeCA', // Your address
-    // Add more addresses here
-];
+// Get whitelist from localStorage (set by admin panel) or use default
+function getWhitelist() {
+    const saved = localStorage.getItem('dusaNFT_whitelist');
+    if (saved) {
+        return JSON.parse(saved);
+    }
+    // Default whitelist
+    return [
+        '0x6Cb5365ADfC0fdFc2aD7C02151A04e9f0F9eBeCA', // Your address
+    ];
+}
 
 // Contract ABI (simplified for minting)
 const CONTRACT_ABI = [
@@ -195,7 +201,8 @@ async function updateSupply() {
 
 // Check if address is whitelisted
 function isWhitelisted(address) {
-    return WHITELIST.map(addr => addr.toLowerCase()).includes(address.toLowerCase());
+    const whitelist = getWhitelist();
+    return whitelist.map(addr => addr.toLowerCase()).includes(address.toLowerCase());
 }
 
 // Mint NFT

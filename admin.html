@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dusa NFT - Admin Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #0D1117;
+            color: #E6EDF3;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .dashboard {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 2rem;
+            color: #00E0FF;
+            text-align: center;
+        }
+
+        .admin-check {
+            background: #161B22;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .admin-status {
+            font-size: 1.2rem;
+            margin-bottom: 15px;
+        }
+
+        .admin-status.success {
+            color: #00E0FF;
+        }
+
+        .admin-status.error {
+            color: #FF4444;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            background: #161B22;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .card h2 {
+            color: #00E0FF;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+        }
+
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 15px 0;
+            border-bottom: 1px solid #30363D;
+        }
+
+        .stat-item:last-child {
+            border-bottom: none;
+        }
+
+        .stat-label {
+            color: #7D8590;
+        }
+
+        .stat-value {
+            color: #E6EDF3;
+            font-weight: 600;
+            font-size: 1.2rem;
+        }
+
+        .control-group {
+            margin-bottom: 25px;
+        }
+
+        .control-group label {
+            display: block;
+            margin-bottom: 10px;
+            color: #7D8590;
+            font-size: 0.9rem;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 10px;
+        }
+
+        input[type="text"], input[type="number"] {
+            flex: 1;
+            padding: 12px;
+            background: #0D1117;
+            border: 1px solid #30363D;
+            border-radius: 8px;
+            color: #E6EDF3;
+            font-size: 1rem;
+        }
+
+        input[type="text"]:focus, input[type="number"]:focus {
+            outline: none;
+            border-color: #512FC9;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            background: #512FC9;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn:hover {
+            background: #6644DD;
+            transform: translateY(-2px);
+        }
+
+        .btn:disabled {
+            background: #30363D;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn.danger {
+            background: #FF4444;
+        }
+
+        .btn.danger:hover {
+            background: #FF6666;
+        }
+
+        .btn.success {
+            background: #00E0FF;
+            color: #0D1117;
+        }
+
+        .toggle-switch {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .switch {
+            position: relative;
+            width: 60px;
+            height: 30px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #30363D;
+            transition: .4s;
+            border-radius: 30px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 22px;
+            width: 22px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: #00E0FF;
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(30px);
+        }
+
+        .whitelist-list {
+            max-height: 300px;
+            overflow-y: auto;
+            margin-top: 20px;
+        }
+
+        .whitelist-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            background: #0D1117;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+
+        .whitelist-address {
+            font-family: monospace;
+            font-size: 0.9rem;
+        }
+
+        .status-message {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            display: none;
+        }
+
+        .status-message.success {
+            background: rgba(0, 224, 255, 0.1);
+            border: 1px solid #00E0FF;
+            color: #00E0FF;
+        }
+
+        .status-message.error {
+            background: rgba(255, 0, 0, 0.1);
+            border: 1px solid #FF4444;
+            color: #FF4444;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard">
+        <h1>Dusa NFT Admin Dashboard</h1>
+        
+        <div class="admin-check">
+            <div class="admin-status" id="adminStatus">Checking admin status...</div>
+            <div id="walletInfo"></div>
+        </div>
+
+        <div class="grid">
+            <!-- Contract Stats -->
+            <div class="card">
+                <h2>Contract Statistics</h2>
+                <div class="stat-item">
+                    <span class="stat-label">Contract Address</span>
+                    <span class="stat-value" style="font-size: 0.8rem;">0x5C30e1...8809Bd8</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Total Minted</span>
+                    <span class="stat-value" id="totalSupply">0</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Max Supply</span>
+                    <span class="stat-value">10,000</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Mint Price</span>
+                    <span class="stat-value" id="mintPrice">0.01 METIS</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Contract Balance</span>
+                    <span class="stat-value" id="contractBalance">0 METIS</span>
+                </div>
+            </div>
+
+            <!-- Contract Controls -->
+            <div class="card">
+                <h2>Contract Controls</h2>
+                
+                <div class="control-group">
+                    <label>Minting Status</label>
+                    <div class="toggle-switch">
+                        <span>Minting Enabled</span>
+                        <label class="switch">
+                            <input type="checkbox" id="mintingToggle" checked>
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label>Update Mint Price (METIS)</label>
+                    <div class="input-group">
+                        <input type="number" id="newMintPrice" placeholder="0.01" step="0.001" min="0">
+                        <button class="btn" onclick="updateMintPrice()">Update</button>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label>Withdraw Funds</label>
+                    <button class="btn success" onclick="withdrawFunds()">Withdraw All</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Whitelist Management -->
+        <div class="card">
+            <h2>Whitelist Management</h2>
+            
+            <div class="control-group">
+                <label>Add Address to Whitelist</label>
+                <div class="input-group">
+                    <input type="text" id="whitelistAddress" placeholder="0x..." maxlength="42">
+                    <button class="btn" onclick="addToWhitelist()">Add Address</button>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <label>Current Whitelist (<span id="whitelistCount">0</span> addresses)</label>
+                <button class="btn" onclick="exportWhitelist()" style="float: right; margin-top: -30px;">Export List</button>
+                <div class="whitelist-list" id="whitelistContainer">
+                    <!-- Whitelist items will be added here -->
+                </div>
+            </div>
+
+            <div class="status-message" id="statusMessage"></div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/web3@1.10.0/dist/web3.min.js"></script>
+    <script src="admin.js"></script>
+</body>
+</html>
