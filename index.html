@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dusa NFT - Mint on Metis</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #0D1117;
+            color: #E6EDF3;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 600px;
+            width: 100%;
+            background: #161B22;
+            border-radius: 12px;
+            padding: 40px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            color: #00E0FF;
+            text-align: center;
+        }
+
+        .video-preview {
+            width: 100%;
+            aspect-ratio: 16/9;
+            background: #0D1117;
+            border-radius: 8px;
+            margin: 30px 0;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .video-preview video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .info-section {
+            margin: 30px 0;
+        }
+
+        .info-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid #30363D;
+        }
+
+        .info-item:last-child {
+            border-bottom: none;
+        }
+
+        .label {
+            color: #7D8590;
+        }
+
+        .value {
+            color: #E6EDF3;
+            font-weight: 500;
+        }
+
+        .mint-button {
+            width: 100%;
+            padding: 16px;
+            background: #512FC9;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 20px;
+        }
+
+        .mint-button:hover {
+            background: #6644DD;
+            transform: translateY(-2px);
+        }
+
+        .mint-button:disabled {
+            background: #30363D;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .wallet-section {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .wallet-address {
+            font-size: 0.9rem;
+            color: #00E0FF;
+            margin-top: 10px;
+        }
+
+        .status-message {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            display: none;
+        }
+
+        .status-message.success {
+            background: rgba(0, 224, 255, 0.1);
+            border: 1px solid #00E0FF;
+            color: #00E0FF;
+        }
+
+        .status-message.error {
+            background: rgba(255, 0, 0, 0.1);
+            border: 1px solid #FF4444;
+            color: #FF4444;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Dusa NFT</h1>
+        
+        <div class="wallet-section">
+            <button id="connectWallet" class="mint-button">Connect Wallet</button>
+            <div class="wallet-address" id="walletAddress"></div>
+        </div>
+
+        <div class="video-preview">
+            <video controls loop muted autoplay>
+                <source src="Dusa_V05.mp4" type="video/mp4">
+                Your browser does not support the video tag.
+            </video>
+        </div>
+
+        <div class="info-section">
+            <div class="info-item">
+                <span class="label">Blockchain</span>
+                <span class="value">Metis Andromeda</span>
+            </div>
+            <div class="info-item">
+                <span class="label">Token Standard</span>
+                <span class="value">ERC-721</span>
+            </div>
+            <div class="info-item">
+                <span class="label">Mint Price</span>
+                <span class="value">0.01 METIS</span>
+            </div>
+            <div class="info-item">
+                <span class="label">Total Supply</span>
+                <span class="value"><span id="totalSupply">0</span> / 10,000</span>
+            </div>
+        </div>
+
+        <button id="mintButton" class="mint-button" disabled>Mint NFT</button>
+        
+        <div id="statusMessage" class="status-message"></div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/web3@1.10.0/dist/web3.min.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
